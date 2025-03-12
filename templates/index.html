@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cat vs Dog Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Cat vs Dog Classifier</h1>
+        
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" accept="image/*" required>
+            <button type="submit">Predict</button>
+        </form>
+
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Analyzing image...</p>
+        </div>
+
+        <div id="result" class="hidden">
+            <h2>Prediction: <span id="predictionText"></span></h2>
+            <img id="previewImage" src="" alt="Uploaded Image">
+        </div>
+
+        <div id="error" class="hidden"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const error = document.getElementById('error');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            loading.classList.remove('hidden');
+            result.classList.add('hidden');
+            error.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', document.getElementById('fileInput').files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                loading.classList.add('hidden');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    document.getElementById('predictionText').textContent = data.prediction;
+                    document.getElementById('previewImage').src = 
+                        `{{ url_for('static', filename='') }}${data.image_url}`;
+                    result.classList.remove('hidden');
+                }
+            } catch (err) {
+                loading.classList.add('hidden');
+                showError(err.message || 'Failed to process request');
+                console.error('Error:', err);
+            }
+        });
+
+        function showError(message) {
+            error.textContent = message;
+            error.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
