@@ -43,7 +43,7 @@ pip install -r requirements.txt
 ### Model Training
 1. Run the Jupyter notebook:
 ```
-jupyter notebook notebooks/HandwrittenDigitClassification.ipnyb
+jupyter notebook notebooks/train.ipnyb
 ```
 2. Execute all cells to:
     - Load and visualize data.
